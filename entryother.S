@@ -32,7 +32,7 @@ start:
 
   # Switch from real to protected mode.  Use a bootstrap GDT that makes
   # virtual addresses map directly to physical addresses so that the
-  # effective memory map doesnot change during the transition.
+  # effective memory map doesn't change during the transition.
   lgdt    gdtdesc
   movl    %cr0, %eax
   orl     $CR0_PE, %eax

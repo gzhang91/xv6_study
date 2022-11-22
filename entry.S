@@ -35,7 +35,7 @@ multiboot_header:
   .long (-magic-flags)
 
 # By convention, the _start symbol specifies the ELF entry point.
-# Since we havenot set up virtual memory yet, our entry point is
+# Since we haven't set up virtual memory yet, our entry point is
 # the physical address of 'entry'.
 .globl _start
 _start = V2P_WO(entry)
