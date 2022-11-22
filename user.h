@@ -24,6 +24,8 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int getcpuid(void);
+int write_sh_var(char *, int);
+int read_sh_var(char *, int);
 
 // ulib.c
 int stat(char*, struct stat*);

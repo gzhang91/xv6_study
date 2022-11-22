@@ -21,6 +21,7 @@ OBJS = \
 	syscall.o\
 	sysfile.o\
 	sysproc.o\
+	sysvar.o\
 	timer.o\
 	trapasm.o\
 	trap.o\
@@ -176,6 +177,7 @@ UPROGS=\
 	_print-pid\
 	_pcpuid\
 	_my-app-fork\
+	_my-app-var\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

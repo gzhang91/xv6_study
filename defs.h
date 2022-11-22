@@ -178,3 +178,8 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+
+// other var
+int             write_sh_var(char *, int);
+int             read_sh_var(char *, int);
