@@ -37,7 +37,7 @@ bootmain(void)
   for(; ph < eph; ph++){
     pa = (uchar*)ph->paddr;
     readseg(pa, ph->filesz, ph->off);
-    if(ph->memsz > ph->filesz)
+    if(ph->memsz > ph->filesz)  // 内存size>文件size，那么需要将多的内存全置为0
       stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
   }
 
@@ -61,16 +61,16 @@ readsect(void *dst, uint offset)
 {
   // Issue command.
   waitdisk();
-  outb(0x1F2, 1);   // count = 1
-  outb(0x1F3, offset);
-  outb(0x1F4, offset >> 8);
-  outb(0x1F5, offset >> 16);
-  outb(0x1F6, (offset >> 24) | 0xE0);
-  outb(0x1F7, 0x20);  // cmd 0x20 - read sectors
+  outb(0x1F2, 1);   // count = 1 读入一个扇区
+  outb(0x1F3, offset);                 // LBA参数的0-7位
+  outb(0x1F4, offset >> 8);            // LBA参数的8-15位
+  outb(0x1F5, offset >> 16);           // LBA参数的16-23位
+  outb(0x1F6, (offset >> 24) | 0xE0);  // 0xE0(1110 0000)+LBA的27-24位
+  outb(0x1F7, 0x20);                   // cmd 0x20 - read sectors，发出读命令
 
   // Read data.
-  waitdisk();
-  insl(0x1F0, dst, SECTSIZE/4);
+  waitdisk();                          // 轮询等到数据读入操作的完成
+  insl(0x1F0, dst, SECTSIZE/4);        // 从IO端口读入一个扇区数据，每次一个long 4字节，所以要除以4
 }
 
 // Read 'count' bytes at 'offset' from kernel into physical address 'pa'.
@@ -86,11 +86,11 @@ readseg(uchar* pa, uint count, uint offset)
   pa -= offset % SECTSIZE;
 
   // Translate from bytes to sectors; kernel starts at sector 1.
-  offset = (offset / SECTSIZE) + 1;
+  offset = (offset / SECTSIZE) + 1;  // 扇区号要+1，传入0，读的是1号扇区
 
   // If this is too slow, we could read lots of sectors at a time.
   // We'd write more to memory than asked, but it doesn't matter --
   // we load in increasing order.
   for(; pa < epa; pa += SECTSIZE, offset++)
-    readsect(pa, offset);
+    readsect(pa, offset);      // 读入编号为offset的扇区到pa地址
 }

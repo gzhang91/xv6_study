@@ -4,7 +4,7 @@ static inline uchar
 inb(ushort port)
 {
   uchar data;
-
+  // 从端口port中读出数据到al中，传入到data中
   asm volatile("in %1,%0" : "=a" (data) : "d" (port));
   return data;
 }
@@ -12,6 +12,8 @@ inb(ushort port)
 static inline void
 insl(int port, void *addr, int cnt)
 {
+  // 清理传送方向cld
+  // 设置edi为addr,读取的数量为cnt。从端口port中读取cnt个dword到addr中
   asm volatile("cld; rep insl" :
                "=D" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
@@ -21,18 +23,21 @@ insl(int port, void *addr, int cnt)
 static inline void
 outb(ushort port, uchar data)
 {
+  // 将data(byte)数据写入到port(ushort)中
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
 static inline void
 outw(ushort port, ushort data)
 {
+  // 将data(ushort)数据写入到port(ushort)中
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
 static inline void
 outsl(int port, const void *addr, int cnt)
 {
+  // 循环将esi(addr)中的cnt个dword数据写入到port端口中
   asm volatile("cld; rep outsl" :
                "=S" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
@@ -42,6 +47,7 @@ outsl(int port, const void *addr, int cnt)
 static inline void
 stosb(void *addr, int data, int cnt)
 {
+  // 将cnt个data(byte)存入到addr内存中
   asm volatile("cld; rep stosb" :
                "=D" (addr), "=c" (cnt) :
                "0" (addr), "1" (cnt), "a" (data) :
@@ -51,6 +57,7 @@ stosb(void *addr, int data, int cnt)
 static inline void
 stosl(void *addr, int data, int cnt)
 {
+  // 将cnt个data(dword)存入到addr内存中
   asm volatile("cld; rep stosl" :
                "=D" (addr), "=c" (cnt) :
                "0" (addr), "1" (cnt), "a" (data) :

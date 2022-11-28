@@ -77,7 +77,12 @@ OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
 #CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -fvar-tracking -fvar-tracking-assignments -O0 -g -Wall -MD -gdwarf-2 -m32 -Werror -fno-omit-frame-pointer
+# gcc -x c: 设定文件所属的预研 E: 预处理 -fno-stack-protector: 默认不生成栈帧保护
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+
+# gcc 汇编选项
+# -gdwarf,-gdwarf-version: Produce debugging information in DWARF format (if that is supported)
+# -Wa,option: Pass option as an option to the assembler. If option contains commas, it is split into multiple options at the commas
 ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
 # FreeBSD ld wants ``elf_i386_fbsd''
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null)
@@ -92,6 +97,11 @@ xv6memfs.img: bootblock kernelmemfs
 	dd if=bootblock of=xv6memfs.img conv=notrunc
 	dd if=kernelmemfs of=xv6memfs.img seek=1 conv=notrunc
 
+# ld -N: Do not page align data, do not make text readonly
+# objdump -S: Intermix source code with disassembly
+# objcopy -S: Remove all symbol and relocation information
+#         -O: Create an output file in format <bfdname>
+#         -j: Only copy section <name> into the output
 bootblock: bootasm.S bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I. -c bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -nostdinc -I. -c bootasm.S
@@ -232,11 +242,13 @@ qemu-nox: fs.img xv6.img
 
 qemu-gdb: fs.img xv6.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
-	$(QEMU) -serial mon:stdio $(QEMUOPTS) -S $(QEMUGDB)
+#	$(QEMU) -serial mon:stdio $(QEMUOPTS) -S $(QEMUGDB)
+	$(QEMU) -monitor stdio $(QEMUOPTS) -S $(QEMUGDB)
 
 qemu-nox-gdb: fs.img xv6.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
-	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
+#	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
+	$(QEMU) -nographic -monitor stdio $(QEMUOPTS) -S $(QEMUGDB)
 
 # CUT HERE
 # prepare dist for students
